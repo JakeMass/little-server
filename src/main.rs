@@ -1,4 +1,6 @@
-use little_server::ThreadPool;
+mod thread_pool;
+
+use thread_pool::ThreadPool;
 use std::fs;
 use std::io::prelude::*;
 use std::net::{TcpListener, TcpStream};
@@ -19,7 +21,7 @@ fn main() {
         }
     }
 
-    println!("Shutting down.");
+   // println!("Closing server.\nBye.")
 }
 
 fn handle_connection(mut stream: TcpStream) {
