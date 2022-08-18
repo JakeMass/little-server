@@ -1,6 +1,12 @@
 mod thread_pool;
+mod constants;
+mod request_parser;
 
+use constants::BUFFER_SIZE;
+
+use request_parser::Request;
 use thread_pool::ThreadPool;
+
 use std::fs;
 use std::io::prelude::*;
 use std::net::{TcpListener, TcpStream};
@@ -25,11 +31,15 @@ fn main() {
 }
 
 fn handle_connection(mut stream: TcpStream) {
-    let mut buffer = [0; 1024];
+    let mut buffer = [0; BUFFER_SIZE];
     stream.read(&mut buffer).unwrap();
 
     let get = b"GET / HTTP/1.1\r\n";
     let js = b"GET /test.js HTTP/1.1\r\n";
+
+    let request = Request::new(&buffer);
+
+    println!("{:?}", request);
 
     let (status_line, filename) = 
         if buffer.starts_with(get) {
