@@ -35,9 +35,20 @@ impl Request {
             None => ""
         };
 
+        let mut method = if method_string.starts_with(GET) {
+            RequestMethod::GET
+        } else if method_string.starts_with(POST) {
+            RequestMethod::POST
+        } else if method_string.starts_with(PATCH) {
+            RequestMethod::PATCH
+        } else if method_string.starts_with(DELETE) {
+            RequestMethod::DELETE
+        } else {
+            RequestMethod::INVALID
+        };
+
         let mut path = String::from("");
         let mut rel_path = String::from("");
-        let mut method = RequestMethod::INVALID;
 
         // What route does the client want
         let route = match parts.get(1)  {
@@ -53,22 +64,11 @@ impl Request {
 
                 rel_path = keys[2..].join("/");
 
-                method = 
-                    if method_string.starts_with(GET) {
-                        RequestMethod::GET
-                    } else if method_string.starts_with(POST) {
-                        RequestMethod::POST
-                    } else if method_string.starts_with(PATCH) {
-                        RequestMethod::PATCH
-                    } else if method_string.starts_with(DELETE) {
-                        RequestMethod::DELETE
-                    } else {
-                        RequestMethod::INVALID
-                    };
-
                 match routes(&method).get(&root) {
                     Some(r) => {
+                        // Only set the path if there is a valid route
                         path = value;
+                        
                         r.copy()
                     },
                     None => routes(&RequestMethod::GET).get("/404").unwrap().copy()                                                
