@@ -28,8 +28,6 @@ fn main() {
             println!("running loop");
         }
     }
-
-   // println!("Closing server.\nBye.")
 }
 
 fn handle_connection(mut stream: TcpStream) {
@@ -38,7 +36,7 @@ fn handle_connection(mut stream: TcpStream) {
 
     let request = Request::new(&buffer);
 
-    let response = request.respond_as_bytes();
+    let response = request.respond();
     
     stream.write_all(response.as_bytes()).unwrap();
     stream.flush().unwrap();

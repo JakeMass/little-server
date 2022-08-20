@@ -23,16 +23,19 @@ impl Request {
 
         let req: Vec<&str> = req.split("\r\n").collect();
 
+        // Get header informations
         let parts = match req.get(0) {
             Some(v) => v.split(" ").collect(),
             None => vec![]
         };
 
+        // GET, POST, PATCH or DELETE
         let method_string = match parts.get(0) {
             Some(v) => v,
             None => ""
         };
 
+        // What route does the client want
         let route = match parts.get(1)  {
             Some(v) => match routes().get(*v) {
                 Some(r) => r.copy(),
@@ -41,6 +44,7 @@ impl Request {
             None => routes().get("/404").unwrap().copy()
         };
 
+        // Check if HTTP/1.1 is present
         let http_valid = match parts.get(2) {
             Some(value) => value.starts_with(HTTP),
             None => false
@@ -67,7 +71,7 @@ impl Request {
         }
     }
 
-    pub fn respond_as_bytes(&self) -> String {
+    pub fn respond(&self) -> String {
         self.route.respond(&self)
     }
 }
