@@ -37,13 +37,12 @@ impl Request {
 
         let mut path = String::from("");
         let mut rel_path = String::from("");
+        let mut method = RequestMethod::INVALID;
 
         // What route does the client want
         let route = match parts.get(1)  {
             Some(v) => {
                 let value = String::from(*v);
-
-                println!("Requested path is: {}", value);
 
                 let keys: Vec<&str> = value.split("/").collect();
 
@@ -54,21 +53,28 @@ impl Request {
 
                 rel_path = keys[2..].join("/");
 
-                println!("Relative path is: {}", rel_path);
+                method = 
+                    if method_string.starts_with(GET) {
+                        RequestMethod::GET
+                    } else if method_string.starts_with(POST) {
+                        RequestMethod::POST
+                    } else if method_string.starts_with(PATCH) {
+                        RequestMethod::PATCH
+                    } else if method_string.starts_with(DELETE) {
+                        RequestMethod::DELETE
+                    } else {
+                        RequestMethod::INVALID
+                    };
 
-                println!("Keys are: {:?}", keys);
-
-                println!("Root is: {}", root);
-
-                match routes().get(&root) {
+                match routes(&method).get(&root) {
                     Some(r) => {
                         path = value;
                         r.copy()
                     },
-                    None => routes().get("/404").unwrap().copy()                                                
+                    None => routes(&RequestMethod::GET).get("/404").unwrap().copy()                                                
                 }
             },
-            None => routes().get("/404").unwrap().copy()
+            None => routes(&RequestMethod::GET).get("/404").unwrap().copy()
         };
 
         // Check if HTTP/1.1 is present
@@ -77,20 +83,9 @@ impl Request {
             None => false
         };
 
-        let method = 
-            if !http_valid {
-                RequestMethod::INVALID
-            } else if method_string.starts_with(GET) {
-                RequestMethod::GET
-            } else if method_string.starts_with(POST) {
-                RequestMethod::POST
-            } else if method_string.starts_with(PATCH) {
-                RequestMethod::PATCH
-            } else if method_string.starts_with(DELETE) {
-                RequestMethod::DELETE
-            } else {
-                RequestMethod::INVALID
-            };
+        if !http_valid {
+            method = RequestMethod::INVALID
+        } 
 
         Request {
             method,

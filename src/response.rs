@@ -78,8 +78,6 @@ pub fn view_with_code(path: &str, code: &str) -> Response {
 pub fn resource(path: &str) -> Response {
     let path = format!("{}/{}", RES_FOLDER, path);
 
-    println!("Real path: {}", path);
-
     let parts: Vec<&str> = path.split(".").collect();
 
     let extension = match parts.get(parts.len() - 1) {
@@ -88,8 +86,6 @@ pub fn resource(path: &str) -> Response {
     };
 
     let mime = guessMimeByExtension(extension);
-    
-    println!("Meta: {:?}", mime);
 
     match fs::read_to_string(path) {
         Ok(v) => {
