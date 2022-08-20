@@ -10,11 +10,11 @@ pub enum RequestMethod {
     INVALID
 }
 
-
-
 pub struct Request {
     method: RequestMethod,
-    route: Route
+    route: Route,
+    path: String,
+    rel_path: String
 }
 
 impl Request {
@@ -35,11 +35,38 @@ impl Request {
             None => ""
         };
 
+        let mut path = String::from("");
+        let mut rel_path = String::from("");
+
         // What route does the client want
         let route = match parts.get(1)  {
-            Some(v) => match routes().get(*v) {
-                Some(r) => r.copy(),
-                None => routes().get("/404").unwrap().copy()
+            Some(v) => {
+                let value = String::from(*v);
+
+                println!("Requested path is: {}", value);
+
+                let keys: Vec<&str> = value.split("/").collect();
+
+                let root = match keys.get(1) {
+                    Some(v) =>format!("/{}", *v),
+                    None => String::from("")
+                };
+
+                rel_path = keys[2..].join("/");
+
+                println!("Relative path is: {}", rel_path);
+
+                println!("Keys are: {:?}", keys);
+
+                println!("Root is: {}", root);
+
+                match routes().get(&root) {
+                    Some(r) => {
+                        path = value;
+                        r.copy()
+                    },
+                    None => routes().get("/404").unwrap().copy()                                                
+                }
             },
             None => routes().get("/404").unwrap().copy()
         };
@@ -67,11 +94,21 @@ impl Request {
 
         Request {
             method,
-            route
+            route,
+            path,
+            rel_path
         }
     }
 
     pub fn respond(&self) -> String {
         self.route.respond(&self)
+    }
+
+    pub fn path(&self) -> String {
+        self.path.to_string()
+    }
+
+    pub fn rel_path(&self) -> String{
+        self.rel_path.to_string()
     }
 }

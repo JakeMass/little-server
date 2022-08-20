@@ -34,4 +34,8 @@ impl Route{
 
         response.to_string()
     }
+
+    pub fn path(&self) -> String {
+        self.path.to_string()
+    }
 }
