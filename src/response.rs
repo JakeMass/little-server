@@ -2,6 +2,7 @@ use std::{fs, fmt::format};
 
 use crate::constants::{
     OK_200,
+    OK_204,
     NF_404,
     RES_FOLDER
 };
@@ -18,11 +19,25 @@ impl Response {
 
     pub fn to_string(&self) -> String {
         format!(
-            "{}\r\n{}",
+            "{}\r\n\r\n{}",
             self.headers,
             self.contents
         )
     }
+}
+
+pub fn json(contents: &str) -> Response {
+    let contents = String::from(contents);
+
+    let headers = format!(
+        "{}Content-Length: {}\r\n{}",
+        OK_200,
+        contents.len(),
+        "Content-Type: application/json"
+    );
+
+
+    Response { headers, contents }
 }
 
 pub fn view(path: &str) -> Response {

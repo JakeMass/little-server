@@ -1,11 +1,16 @@
-use crate::{request::Request, response::view_with_code, constants::NF_404};
-use super::response::{Response, view, resource};
+use crate::{request::Request, response::view_with_code, constants::{NF_404, OK_204}};
+use super::response::{Response, view, resource, json};
 
 pub fn get(request: &Request) -> Response {
 
     //
 
     view("hello.html")
+}
+
+pub fn post(request: &Request) -> Response {
+
+    json("{ \"test\": \"Das ist ein Test\" }")
 }
 
 pub fn not_found(request: &Request) -> Response {
