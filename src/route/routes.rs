@@ -25,13 +25,6 @@ pub fn get(path: &str, clb: RouteClb) -> (String, Route) {
     )
 }
 
-pub fn get_prefix(path: &str, clb: RouteClb) -> (String, Route) {
-    (
-        String::from(path),
-        Route::new(RequestMethod::GET, path, clb)
-    )
-}
-
 pub fn post(path: &str, clb: RouteClb) -> (String, Route) {
     (
         String::from(path),
