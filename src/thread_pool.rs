@@ -6,8 +6,8 @@ use std::net::{TcpListener, TcpStream};
 use crate::handle_connection;
 
 pub struct PoolMaster{
-    pool: ThreadPool,
-    listener: TcpListener,
+    pub pool: ThreadPool,
+    pub listener: TcpListener,
 }
 
 impl PoolMaster{
@@ -15,21 +15,8 @@ impl PoolMaster{
         PoolMaster { pool, listener }
     }
 
-    pub fn execute(&self) {
-        for stream in self.listener.incoming() {
-            match stream {
-                Ok(s) => {
-                    self.pool.execute(move || {
-                        handle_connection(s);
-                    }).unwrap();
-                }
-                Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
-                    break;
-                },
-                Err(e) => println!("{e}")
-            };
-    
-        }
+    pub fn execute(&self, clb: fn(&PoolMaster)) {
+        clb(self);
     }
 }
 

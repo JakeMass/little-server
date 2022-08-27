@@ -41,7 +41,7 @@ fn main() {
     }).unwrap();
 
     while running.load(std::sync::atomic::Ordering::SeqCst) {
-        pool_master.execute();
+        pool_master.execute(handle_listener);
     }
 
     println!("Shutting down main thread");
@@ -62,4 +62,21 @@ fn handle_connection(mut stream: TcpStream) {
 
     stream.write_all(response.as_bytes()).unwrap();
     stream.flush().unwrap();
+}
+
+fn handle_listener(pm: &PoolMaster) {
+    for stream in pm.listener.incoming() {
+        match stream {
+            Ok(s) => {
+                pm.pool.execute(move || {
+                    handle_connection(s);
+                }).unwrap();
+            }
+            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                break;
+            },
+            Err(e) => println!("{e}")
+        };
+
+    }
 }
