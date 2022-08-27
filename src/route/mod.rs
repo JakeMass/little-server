@@ -38,4 +38,8 @@ impl Route{
     pub fn path(&self) -> String {
         self.path.to_string()
     }
+
+    pub fn clb(&self) -> RouteClb {
+        self.clb
+    }
 }

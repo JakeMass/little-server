@@ -62,7 +62,7 @@ impl Request {
                     None => String::from("")
                 };
 
-                rel_path = keys[2..].join("/");
+                rel_path = format!("/{}", keys[2..].join("/"));
 
                 match routes(&method).get(&root) {
                     Some(r) => {
@@ -97,6 +97,10 @@ impl Request {
 
     pub fn respond(&self) -> String {
         self.route.respond(&self)
+    }
+
+    pub fn method(&self) -> &RequestMethod {
+        &self.method
     }
 
     pub fn path(&self) -> String {
