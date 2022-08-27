@@ -8,37 +8,38 @@ pub mod thread_pool;
 use constants::BUFFER_SIZE;
 
 use request::Request;
-use thread_pool::{ThreadPool, PoolMaster};
+use thread_pool::{PoolMaster, ThreadPool};
 
-use std::{io::prelude::*, sync::atomic::AtomicBool};
-use text_io::read;
 use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
+use std::{io::prelude::*, sync::atomic::AtomicBool};
+use text_io::read;
 
 fn main() {
-    
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
     listener.set_nonblocking(true).unwrap();
-    
+
     let main_pool = ThreadPool::new(4);
     let input_pool = ThreadPool::new(1);
-    
+
     let pool_master = PoolMaster::new(main_pool, listener);
 
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
 
-    input_pool.execute(move || {
-        while r.load(std::sync::atomic::Ordering::SeqCst){
-            let line: String = read!();
-    
-            println!("$: {}", line);
-    
-            if line == "quit" {
-                r.store(false, std::sync::atomic::Ordering::SeqCst);
+    input_pool
+        .execute(move || {
+            while r.load(std::sync::atomic::Ordering::SeqCst) {
+                let line: String = read!();
+
+                println!("$: {}", line);
+
+                if line == "quit" {
+                    r.store(false, std::sync::atomic::Ordering::SeqCst);
+                }
             }
-        }
-    }).unwrap();
+        })
+        .unwrap();
 
     while running.load(std::sync::atomic::Ordering::SeqCst) {
         pool_master.execute(handle_listener);
@@ -52,7 +53,6 @@ fn main() {
 }
 
 fn handle_connection(mut stream: TcpStream) {
-
     let mut buffer = [0; BUFFER_SIZE];
     stream.read(&mut buffer).unwrap();
 
@@ -68,15 +68,16 @@ fn handle_listener(pm: &PoolMaster) {
     for stream in pm.listener.incoming() {
         match stream {
             Ok(s) => {
-                pm.pool.execute(move || {
-                    handle_connection(s);
-                }).unwrap();
+                pm.pool
+                    .execute(move || {
+                        handle_connection(s);
+                    })
+                    .unwrap();
             }
             Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                 break;
-            },
-            Err(e) => println!("{e}")
+            }
+            Err(e) => println!("{e}"),
         };
-
     }
 }

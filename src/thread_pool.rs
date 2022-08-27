@@ -1,16 +1,16 @@
-use std::{
-    sync::{mpsc, Arc, Mutex, atomic::AtomicBool},
-    thread, io,
-};
 use std::net::{TcpListener, TcpStream};
-use crate::handle_connection;
+use std::{
+    io,
+    sync::{atomic::AtomicBool, mpsc, Arc, Mutex},
+    thread,
+};
 
-pub struct PoolMaster{
+pub struct PoolMaster {
     pub pool: ThreadPool,
     pub listener: TcpListener,
 }
 
-impl PoolMaster{
+impl PoolMaster {
     pub fn new(pool: ThreadPool, listener: TcpListener) -> PoolMaster {
         PoolMaster { pool, listener }
     }
