@@ -1,7 +1,37 @@
 use std::{
-    sync::{mpsc, Arc, Mutex},
-    thread,
+    sync::{mpsc, Arc, Mutex, atomic::AtomicBool},
+    thread, io,
 };
+use std::net::{TcpListener, TcpStream};
+use crate::handle_connection;
+
+pub struct PoolMaster{
+    pool: ThreadPool,
+    listener: TcpListener,
+}
+
+impl PoolMaster{
+    pub fn new(pool: ThreadPool, listener: TcpListener) -> PoolMaster {
+        PoolMaster { pool, listener }
+    }
+
+    pub fn execute(&self) {
+        for stream in self.listener.incoming() {
+            match stream {
+                Ok(s) => {
+                    self.pool.execute(move || {
+                        handle_connection(s);
+                    }).unwrap();
+                }
+                Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
+                    break;
+                },
+                Err(e) => println!("{e}")
+            };
+    
+        }
+    }
+}
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
@@ -30,13 +60,13 @@ impl ThreadPool {
         }
     }
 
-    pub fn execute<F>(&self, f: F)
+    pub fn execute<F>(&self, f: F) -> Result<(), mpsc::SendError<Box<dyn FnOnce() + Send>>>
     where
         F: FnOnce() + Send + 'static,
     {
         let job = Box::new(f);
-        println!("execute job");
-        self.sender.as_ref().unwrap().send(job).unwrap();
+
+        self.sender.as_ref().unwrap().send(job)
     }
 }
 
@@ -68,7 +98,6 @@ impl Worker {
 
             match message {
                 Ok(job) => {
-                    println!("running job on thread {id}");
                     job();
                 }
                 Err(e) => {

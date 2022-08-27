@@ -21,7 +21,7 @@ pub fn json(contents: &str) -> Response {
     let contents = String::from(contents);
 
     let headers = format!(
-        "{}Content-Length: {}\r\n{}",
+        "{}Content-Length: {}\r\n{}\r\n",
         OK_200,
         contents.len(),
         "Content-Type: application/json"
@@ -84,8 +84,6 @@ pub fn resource(path: &str) -> Response {
                 v.len(),
                 format!("Content-Type: {}", mime)
             );
-
-            println!("{v}");
 
             Response::new(headers, v)
         }
