@@ -1,23 +1,22 @@
-
 pub mod routes;
 
+use crate::request::{Request, RequestMethod};
 use crate::response::Response;
-use crate::request::{RequestMethod, Request};
 
 pub type RouteClb = fn(&Request) -> Response;
 
 pub struct Route {
     path: String,
     method: RequestMethod,
-    clb: RouteClb
+    clb: RouteClb,
 }
 
-impl Route{
+impl Route {
     pub fn new(method: RequestMethod, path: &str, clb: RouteClb) -> Route {
         Route {
             path: String::from(path),
             method,
-            clb
+            clb,
         }
     }
 
@@ -25,7 +24,7 @@ impl Route{
         Route {
             path: self.path.to_string(),
             method: self.method,
-            clb: self.clb
+            clb: self.clb,
         }
     }
 

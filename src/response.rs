@@ -1,15 +1,10 @@
-use std::{fs, fmt::format};
+use std::{fmt::format, fs};
 
-use crate::constants::{
-    OK_200,
-    OK_204,
-    NF_404,
-    RES_FOLDER
-};
+use crate::constants::{NF_404, OK_200, OK_204, RES_FOLDER};
 
 pub struct Response {
     headers: String,
-    contents: String
+    contents: String,
 }
 
 impl Response {
@@ -18,11 +13,7 @@ impl Response {
     }
 
     pub fn to_string(&self) -> String {
-        format!(
-            "{}\r\n\r\n{}",
-            self.headers,
-            self.contents
-        )
+        format!("{}\r\n{}", self.headers, self.contents)
     }
 }
 
@@ -36,29 +27,20 @@ pub fn json(contents: &str) -> Response {
         "Content-Type: application/json"
     );
 
-
     Response { headers, contents }
 }
 
 pub fn view(path: &str) -> Response {
     match fs::read_to_string(path) {
         Ok(v) => {
-            let headers = format!(
-                "{}Content-Length: {}\r\n",
-                OK_200,
-                v.len()
-            );
+            let headers = format!("{}Content-Length: {}\r\n", OK_200, v.len());
 
             Response::new(headers, v)
-        },
+        }
         Err(e) => {
             let error = e.to_string();
 
-            let headers = format!(
-                "{}Content-Length: {}\r\n",
-                NF_404,
-                error.len()
-            );
+            let headers = format!("{}Content-Length: {}\r\n", NF_404, error.len());
 
             Response::new(headers, error)
         }
@@ -68,22 +50,14 @@ pub fn view(path: &str) -> Response {
 pub fn view_with_code(path: &str, code: &str) -> Response {
     match fs::read_to_string(path) {
         Ok(v) => {
-            let headers = format!(
-                "{}Content-Length: {}\r\n",
-                code,
-                v.len()
-            );
+            let headers = format!("{}Content-Length: {}\r\n", code, v.len());
 
             Response::new(headers, v)
-        },
+        }
         Err(e) => {
             let error = e.to_string();
 
-            let headers = format!(
-                "{}Content-Length: {}\r\n",
-                NF_404,
-                error.len()
-            );
+            let headers = format!("{}Content-Length: {}\r\n", NF_404, error.len());
 
             Response::new(headers, error)
         }
@@ -91,13 +65,13 @@ pub fn view_with_code(path: &str, code: &str) -> Response {
 }
 
 pub fn resource(path: &str) -> Response {
-    let path = format!("{}/{}", RES_FOLDER, path);
+    let path = format!("{}{}", RES_FOLDER, path);
 
     let parts: Vec<&str> = path.split(".").collect();
 
     let extension = match parts.get(parts.len() - 1) {
         Some(v) => *v,
-        None => ""
+        None => "",
     };
 
     let mime = guessMimeByExtension(extension);
@@ -111,16 +85,14 @@ pub fn resource(path: &str) -> Response {
                 format!("Content-Type: {}", mime)
             );
 
+            println!("{v}");
+
             Response::new(headers, v)
-        },
+        }
         Err(e) => {
             let error = e.to_string();
 
-            let headers = format!(
-                "{}Content-Length: {}\r\n",
-                NF_404,
-                error.len()
-            );
+            let headers = format!("{}Content-Length: {}\r\n", NF_404, error.len());
 
             Response::new(headers, error)
         }
@@ -130,6 +102,6 @@ pub fn resource(path: &str) -> Response {
 fn guessMimeByExtension(extension: &str) -> String {
     match extension {
         "js" => String::from("text/javascript"),
-        _ => String::from("")
+        _ => String::from(""),
     }
 }

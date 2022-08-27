@@ -1,5 +1,5 @@
-use crate::constants::{BUFFER_SIZE, GET, POST, PATCH, DELETE, HTTP};
-use crate::route::{Route, routes::routes};
+use crate::constants::{BUFFER_SIZE, DELETE, GET, HTTP, PATCH, POST};
+use crate::route::{routes::routes, Route};
 
 #[derive(Copy, Clone, Debug)]
 pub enum RequestMethod {
@@ -7,14 +7,14 @@ pub enum RequestMethod {
     POST,
     PATCH,
     DELETE,
-    INVALID
+    INVALID,
 }
 
 pub struct Request {
     method: RequestMethod,
     route: Route,
     path: String,
-    rel_path: String
+    rel_path: String,
 }
 
 impl Request {
@@ -26,13 +26,13 @@ impl Request {
         // Get header informations
         let parts = match req.get(0) {
             Some(v) => v.split(" ").collect(),
-            None => vec![]
+            None => vec![],
         };
 
         // GET, POST, PATCH or DELETE
         let method_string = match parts.get(0) {
             Some(v) => v,
-            None => ""
+            None => "",
         };
 
         let mut method = if method_string.starts_with(GET) {
@@ -51,15 +51,15 @@ impl Request {
         let mut rel_path = String::from("");
 
         // What route does the client want
-        let route = match parts.get(1)  {
+        let route = match parts.get(1) {
             Some(v) => {
                 let value = String::from(*v);
 
                 let keys: Vec<&str> = value.split("/").collect();
 
                 let root = match keys.get(1) {
-                    Some(v) =>format!("/{}", *v),
-                    None => String::from("")
+                    Some(v) => format!("/{}", *v),
+                    None => String::from(""),
                 };
 
                 rel_path = format!("/{}", keys[2..].join("/"));
@@ -68,30 +68,30 @@ impl Request {
                     Some(r) => {
                         // Only set the path if there is a valid route
                         path = value;
-                        
+
                         r.copy()
-                    },
-                    None => routes(&RequestMethod::GET).get("/404").unwrap().copy()                                                
+                    }
+                    None => routes(&RequestMethod::GET).get("/404").unwrap().copy(),
                 }
-            },
-            None => routes(&RequestMethod::GET).get("/404").unwrap().copy()
+            }
+            None => routes(&RequestMethod::GET).get("/404").unwrap().copy(),
         };
 
         // Check if HTTP/1.1 is present
         let http_valid = match parts.get(2) {
             Some(value) => value.starts_with(HTTP),
-            None => false
+            None => false,
         };
 
         if !http_valid {
             method = RequestMethod::INVALID
-        } 
+        }
 
         Request {
             method,
             route,
             path,
-            rel_path
+            rel_path,
         }
     }
 
@@ -107,7 +107,7 @@ impl Request {
         self.path.to_string()
     }
 
-    pub fn rel_path(&self) -> String{
+    pub fn rel_path(&self) -> String {
         self.rel_path.to_string()
     }
 }

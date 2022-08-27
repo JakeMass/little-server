@@ -1,7 +1,7 @@
 pub mod constants;
 pub mod handlers;
-pub mod response;
 pub mod request;
+pub mod response;
 pub mod route;
 pub mod thread_pool;
 
@@ -20,7 +20,7 @@ fn main() {
     loop {
         for stream in listener.incoming() {
             let stream = stream.unwrap();
-    
+
             pool.execute(|| {
                 handle_connection(stream);
             });
@@ -35,7 +35,7 @@ fn handle_connection(mut stream: TcpStream) {
     let request = Request::new(&buffer);
 
     let response = request.respond();
-    
+
     stream.write_all(response.as_bytes()).unwrap();
     stream.flush().unwrap();
 }
