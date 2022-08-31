@@ -25,7 +25,7 @@ use std::{
 };
 
 fn main() {
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+    let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
     listener.set_nonblocking(true).unwrap();
 
     let main_pool = ThreadPool::new(4);
