@@ -1,6 +1,6 @@
-use std::{fmt::format, fs};
+use std::fs;
 
-use crate::constants::{NF_404, OK_200, OK_204, RES_FOLDER};
+use crate::constants::{NF_404, OK_200, RES_FOLDER};
 
 pub struct Response {
     headers: String,

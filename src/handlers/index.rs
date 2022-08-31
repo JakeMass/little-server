@@ -1,10 +1,15 @@
 use std::collections::HashMap;
 
-use super::response::{json, resource, view, Response};
 use crate::{
-    constants::{NF_404, OK_204},
+    constants::{NF_404},
     request::{Request, RequestMethod},
-    response::view_with_code,
+    response::{
+        view_with_code, 
+        json, 
+        resource, 
+        view, 
+        Response
+    },
     route::{routes, Route},
 };
 

@@ -1,5 +1,5 @@
 use crate::handlers::index;
-use crate::request::{Request, RequestMethod};
+use crate::request::RequestMethod;
 use crate::route::{Route, RouteClb};
 use std::collections::HashMap;
 

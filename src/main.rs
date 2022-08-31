@@ -10,11 +10,19 @@ use constants::BUFFER_SIZE;
 use request::Request;
 use thread_pool::{PoolMaster, ThreadPool};
 
-use std::thread;
-use std::net::{TcpListener, TcpStream};
-use std::sync::Arc;
-use std::time::Duration;
-use std::{io::prelude::*, sync::atomic::AtomicBool};
+use std::{
+    thread,
+    net::{
+        TcpListener,
+        TcpStream,
+    },
+    sync::{
+        Arc,
+        atomic::AtomicBool,
+    },
+    time::Duration,
+    io::prelude::*,
+};
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();

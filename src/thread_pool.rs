@@ -1,7 +1,6 @@
-use std::net::{TcpListener, TcpStream};
 use std::{
-    io,
-    sync::{atomic::AtomicBool, mpsc, Arc, Mutex},
+    sync::{mpsc, Arc, Mutex},
+    net::TcpListener,
     thread,
 };
 
