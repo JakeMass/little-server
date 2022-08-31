@@ -9,7 +9,7 @@ pub fn routes(method: &RequestMethod) -> HashMap<String, Route> {
             get("/", index::get),
             get("/test", index::prefix),
             get("/404", index::not_found),
-            get("/res", index::resources),
+            get("/resources", index::resources),
         ]),
         RequestMethod::POST => HashMap::from([post("/", index::post)]),
         _ => HashMap::from([]),
