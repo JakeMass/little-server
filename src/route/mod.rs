@@ -1,5 +1,5 @@
-pub mod routes;
 pub mod hosts;
+pub mod routes;
 
 use crate::request::{Request, RequestMethod};
 use crate::response::Response;

@@ -1,10 +1,7 @@
 use crate::constants::{BUFFER_SIZE, DELETE, GET, HTTP, PATCH, POST};
-use crate::route::{
-    routes, 
-    hosts,
-    Route
-};
+use crate::route::{hosts, routes, Route};
 use std::collections::HashMap;
+use std::net::TcpStream;
 
 #[derive(Copy, Clone, Debug)]
 pub enum RequestMethod {
@@ -20,11 +17,12 @@ pub struct Request {
     route: Route,
     path: String,
     rel_path: String,
-    headers: HashMap<String, String>
+    headers: HashMap<String, String>,
+    stream: TcpStream,
 }
 
 impl Request {
-    pub fn new(request: &[u8; BUFFER_SIZE]) -> Request {
+    pub fn new(request: &[u8; BUFFER_SIZE], stream: TcpStream) -> Request {
         let req = String::from_utf8(request.to_vec()).unwrap();
 
         let req: Vec<&str> = req.split("\r\n").collect();
@@ -46,14 +44,14 @@ impl Request {
 
         for i in 1..req.len() {
             let key_value: Vec<&str> = req[i].split(":").collect();
-            
+
             if key_value[0] == "" {
                 break;
             }
 
             let key = match key_value.get(0) {
                 Some(v) => String::from(*v),
-                None => "".to_string()
+                None => "".to_string(),
             };
 
             let split_key = String::from(&key) + &":".to_string();
@@ -89,6 +87,7 @@ impl Request {
             path,
             rel_path,
             headers,
+            stream,
         }
     }
 
@@ -98,6 +97,10 @@ impl Request {
 
     pub fn method(&self) -> &RequestMethod {
         &self.method
+    }
+
+    pub fn stream(&self) -> &TcpStream {
+        &self.stream
     }
 
     pub fn path(&self) -> String {
@@ -123,7 +126,11 @@ pub fn find_method_from_string(method_string: String) -> RequestMethod {
     }
 }
 
-pub fn parse_route(route_string: Option<&&str>, method: RequestMethod, headers: &HashMap<String, String>) -> (Route, String, String) {
+pub fn parse_route(
+    route_string: Option<&&str>,
+    method: RequestMethod,
+    headers: &HashMap<String, String>,
+) -> (Route, String, String) {
     match route_string {
         Some(v) => {
             let value = String::from(*v);
@@ -140,7 +147,7 @@ pub fn parse_route(route_string: Option<&&str>, method: RequestMethod, headers: 
 
             let host = match headers.get("Host") {
                 Some(v) => String::from(v),
-                None => "".to_string()
+                None => "".to_string(),
             };
 
             let routes = hosts::get_routes_by_host(&host);
@@ -152,9 +159,23 @@ pub fn parse_route(route_string: Option<&&str>, method: RequestMethod, headers: 
 
                     (r.copy(), path, rel_path)
                 }
-                None => (routes::routes(&RequestMethod::GET).get("/404").unwrap().copy(), path, rel_path),
+                None => (
+                    routes::routes(&RequestMethod::GET)
+                        .get("/404")
+                        .unwrap()
+                        .copy(),
+                    path,
+                    rel_path,
+                ),
             }
         }
-        None => (routes::routes(&RequestMethod::GET).get("/404").unwrap().copy(), "".to_string(), "".to_string()),
+        None => (
+            routes::routes(&RequestMethod::GET)
+                .get("/404")
+                .unwrap()
+                .copy(),
+            "".to_string(),
+            "".to_string(),
+        ),
     }
 }

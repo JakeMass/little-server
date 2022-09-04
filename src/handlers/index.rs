@@ -1,21 +1,17 @@
 use std::collections::HashMap;
 
 use crate::{
-    constants::{NF_404},
+    constants::NF_404,
     request::{Request, RequestMethod},
-    response::{
-        view_with_code, 
-        json, 
-        resource, 
-        view, 
-        Response
-    },
+    response::{file, json, resource, view, view_with_code, Response},
     route::{routes, Route},
 };
 
 pub fn routes(method: &RequestMethod) -> HashMap<String, Route> {
     match method {
-        RequestMethod::GET => HashMap::from([routes::get("/test", test)]),
+        RequestMethod::GET => {
+            HashMap::from([routes::get("/test", test), routes::get("/files", files)])
+        }
         _ => HashMap::from([]),
     }
 }
@@ -55,4 +51,16 @@ pub fn not_found(request: &Request) -> Response {
 
 pub fn resources(request: &Request) -> Response {
     resource(&request.rel_path())
+}
+
+pub fn files(request: &Request) -> Response {
+    println!("{}", request.rel_path());
+
+    let rel_path = request.rel_path();
+
+    let parts: Vec<&str> = rel_path.split("/").collect();
+
+    let path = parts[2..].join("/");
+
+    file(path, request.stream())
 }

@@ -1,13 +1,13 @@
+use crate::request::RequestMethod;
 use crate::route::routes;
 use crate::route::Route;
-use crate::request::RequestMethod;
 use std::collections::HashMap;
 
 pub fn get_routes_by_host(host: &String) -> fn(&RequestMethod) -> HashMap<String, Route> {
     if host == "test.ls:7878" {
         routes::routes
     } else {
-        dummy_routes   
+        dummy_routes
     }
 }
 

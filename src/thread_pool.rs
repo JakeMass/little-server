@@ -1,6 +1,6 @@
 use std::{
-    sync::{mpsc, Arc, Mutex},
     net::TcpListener,
+    sync::{mpsc, Arc, Mutex},
     thread,
 };
 

@@ -11,17 +11,11 @@ use request::Request;
 use thread_pool::{PoolMaster, ThreadPool};
 
 use std::{
-    thread,
-    net::{
-        TcpListener,
-        TcpStream,
-    },
-    sync::{
-        Arc,
-        atomic::AtomicBool,
-    },
-    time::Duration,
     io::prelude::*,
+    net::{TcpListener, TcpStream},
+    sync::{atomic::AtomicBool, Arc},
+    thread,
+    time::Duration,
 };
 
 fn main() {
@@ -37,7 +31,8 @@ fn main() {
     let running_clone = running.clone();
     ctrlc::set_handler(move || {
         running_clone.store(false, std::sync::atomic::Ordering::SeqCst);
-    }).unwrap();
+    })
+    .unwrap();
 
     while running.load(std::sync::atomic::Ordering::SeqCst) {
         pool_master.execute(handle_listener);
@@ -54,7 +49,7 @@ fn handle_connection(mut stream: TcpStream) {
     let mut buffer = [0; BUFFER_SIZE];
     stream.read(&mut buffer).unwrap();
 
-    let request = Request::new(&buffer);
+    let request = Request::new(&buffer, stream.try_clone().unwrap());
 
     let response = request.respond();
 
