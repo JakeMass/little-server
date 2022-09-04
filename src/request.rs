@@ -1,4 +1,5 @@
 use crate::constants::{BUFFER_SIZE, DELETE, GET, HTTP, PATCH, POST};
+use crate::response::Response;
 use crate::route::{hosts, routes, Route};
 use std::collections::HashMap;
 use std::net::TcpStream;
@@ -91,7 +92,7 @@ impl Request {
         }
     }
 
-    pub fn respond(&self) -> String {
+    pub fn respond(&self) -> Response {
         self.route.respond(&self)
     }
 

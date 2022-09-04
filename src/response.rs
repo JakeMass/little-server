@@ -7,11 +7,16 @@ use crate::constants::{NF_404, OK_200, RES_FOLDER};
 pub struct Response {
     headers: String,
     contents: String,
+    stale: bool,
 }
 
 impl Response {
     pub fn new(headers: String, contents: String) -> Response {
-        Response { headers, contents }
+        Response {
+            headers,
+            contents,
+            stale: false,
+        }
     }
 
     pub fn to_string(&self) -> String {
@@ -20,6 +25,14 @@ impl Response {
 
     pub fn header(&self) -> String {
         format!("{}\r\n", self.headers)
+    }
+
+    pub fn set_stale(&mut self, value: bool) {
+        self.stale = value;
+    }
+
+    pub fn is_fresh(&self) -> bool {
+        !self.stale
     }
 }
 
@@ -33,7 +46,7 @@ pub fn json(contents: &str) -> Response {
         "Content-Type: application/json"
     );
 
-    Response { headers, contents }
+    Response::new(headers, contents)
 }
 
 pub fn view(path: &str) -> Response {
@@ -80,7 +93,7 @@ pub fn resource(path: &str) -> Response {
         None => "",
     };
 
-    let mime = guessMimeByExtension(extension);
+    let mime = guess_mime_by_extension(extension);
 
     match fs::read_to_string(path) {
         Ok(v) => {
@@ -113,10 +126,12 @@ pub fn file(path: String, stream: &TcpStream) -> Response {
         None => "",
     };
 
-    let mime = guessMimeByExtension(extension);
+    let mime = guess_mime_by_extension(extension);
 
     let mut file = match File::open(path) {
         Ok(v) => v,
+        // TODO
+        // Actual error handling
         Err(_e) => panic!("FILE ERROR"),
     };
 
@@ -127,8 +142,10 @@ pub fn file(path: String, stream: &TcpStream) -> Response {
         format!("Content-Type: {}", mime)
     );
 
-    let response = Response::new(headers, "".to_string());
+    let mut response = Response::new(headers, "".to_string());
 
+    // TODO
+    // Make this buffer size adjustable
     let mut buf = [0; 4096];
 
     let header = response.header();
@@ -148,10 +165,12 @@ pub fn file(path: String, stream: &TcpStream) -> Response {
         stream.write_all(&buf[..n]).unwrap();
     }
 
+    response.set_stale(true);
+
     response
 }
 
-fn guessMimeByExtension(extension: &str) -> String {
+fn guess_mime_by_extension(extension: &str) -> String {
     match extension {
         "jpg" => String::from("image/jpeg"),
         "js" => String::from("text/javascript"),

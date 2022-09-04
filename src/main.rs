@@ -53,8 +53,14 @@ fn handle_connection(mut stream: TcpStream) {
 
     let response = request.respond();
 
-    stream.write_all(response.as_bytes()).unwrap();
-    stream.flush().unwrap();
+    if response.is_fresh() {
+        let response_string = response.to_string();
+
+        stream.write_all(response_string.as_bytes()).unwrap();
+        stream.flush().unwrap();
+    } else {
+        println!("Response is stale. I'm not responing.");
+    }
 }
 
 fn handle_listener(pm: &PoolMaster) {
@@ -69,7 +75,7 @@ fn handle_listener(pm: &PoolMaster) {
             }
             Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                 //Do something other
-                thread::sleep(Duration::new(0, 10));
+                thread::sleep(Duration::new(0, 50));
                 break;
             }
             Err(e) => println!("{e}"),

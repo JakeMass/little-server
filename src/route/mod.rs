@@ -29,10 +29,10 @@ impl Route {
         }
     }
 
-    pub fn respond(&self, request: &Request) -> String {
+    pub fn respond(&self, request: &Request) -> Response {
         let response = (self.clb)(request);
 
-        response.to_string()
+        response
     }
 
     pub fn path(&self) -> String {

@@ -54,8 +54,6 @@ pub fn resources(request: &Request) -> Response {
 }
 
 pub fn files(request: &Request) -> Response {
-    println!("{}", request.rel_path());
-
     let rel_path = request.rel_path();
 
     let parts: Vec<&str> = rel_path.split("/").collect();
